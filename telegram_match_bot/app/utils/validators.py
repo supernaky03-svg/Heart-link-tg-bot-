@@ -13,7 +13,7 @@ def validate_age(value: str) -> int | None:
     if not value.isdigit():
         return None
     age = int(value)
-    if 18 <= age <= 80:
+    if 10 <= age <= 100:
         return age
     return None
 
