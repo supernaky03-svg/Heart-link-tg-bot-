@@ -58,7 +58,7 @@ MESSAGES = {
     "ask_bio": "ကိုယ့်အကြောင်းတိုတို bio ရေးပါ။",
     "ask_interests": "စိတ်ဝင်စားတာတွေကို comma နဲ့ခွဲပြီးရေးပါ။ ဥပမာ - music, travel, gaming",
     "ask_photo": "Profile photo ပို့ပါ၊ မပို့ချင်ရင် Skip Photo နှိပ်ပါ။",
-    "invalid_age": "အသက်ကို 18 မှ 80 အတွင်း မှန်ကန်စွာ ရိုက်ပါ။",
+    "invalid_age": "အသက်ကို 10နှစ်အထက် မှန်ကန်စွာ ရိုက်ပါ။",
     "invalid_nickname": "Nickname က 2 လုံးမှ 32 လုံးအတွင်း ဖြစ်ရပါမယ်။",
     "invalid_region": "Region က 2 လုံးမှ 40 လုံးအတွင်း ဖြစ်ရပါမယ်။",
     "invalid_bio": "Bio က 10 လုံးမှ 280 လုံးအတွင်း ဖြစ်ရပါမယ်။",
