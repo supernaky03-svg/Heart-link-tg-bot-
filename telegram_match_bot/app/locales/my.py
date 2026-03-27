@@ -1,4 +1,4 @@
-MESSAGES.update({
+MESSAGES={
     "welcome": "💘 HeartLink မှ ကြိုဆိုပါတယ်။",
     "profile_saved": "✅ Profile သိမ်းပြီးပါပြီ။",
     "main_menu_hint": "👇 အောက်က menu ကိုသုံးပါ။",
@@ -25,4 +25,4 @@ MESSAGES.update({
     "gender_female": "မ",
     "confirm_profile_text": "✅ သိမ်းမယ့်အရင် profile ကိုစစ်ကြည့်ပါ။",
     "profile_edit_cancelled": "🛑 Profile ပြင်တာရပ်လိုက်ပါပြီ။",
-})
+}
