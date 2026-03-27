@@ -69,45 +69,49 @@ class UserRepository:
         return dict(row) if row else None
 
     async def set_profile(
-        self,
-        telegram_id: int,
-        *,
-        nickname: str,
-        age: int,
-        gender: str,
-        interested_in: str,
-        region: str,
-        bio: str,
-        interests: list[str],
-        profile_photo_file_id: str | None,
-    ) -> dict[str, Any] | None:
-        row = await self.db.fetchrow(
-            """
-            UPDATE users
-            SET nickname=$2,
-                age=$3,
-                gender=$4,
-                interested_in=$5,
-                region=$6,
-                bio=$7,
-                interests=$8::jsonb,
-                profile_photo_file_id=$9,
-                is_profile_complete=TRUE,
-                updated_at=NOW()
-            WHERE telegram_id=$1
-            RETURNING *
-            """,
-            telegram_id,
-            nickname,
-            age,
-            gender,
-            interested_in,
-            region,
-            bio,
-            json.dumps(interests),
-            profile_photo_file_id,
-        )
-        return dict(row) if row else None
+    self,
+    telegram_id: int,
+    *,
+    nickname: str,
+    age: int,
+    gender: str,
+    interested_in: str,
+    bio: str,
+    interests: list[str],
+    profile_photo_file_id: str,
+    latitude: float,
+    longitude: float,
+) -> dict[str, Any] | None:
+    row = await self.db.fetchrow(
+        """
+        UPDATE users
+        SET nickname=$2,
+            age=$3,
+            gender=$4,
+            interested_in=$5,
+            region=NULL,
+            bio=$6,
+            interests=$7::jsonb,
+            profile_photo_file_id=$8,
+            latitude=$9,
+            longitude=$10,
+            is_profile_complete=TRUE,
+            updated_at=NOW()
+        WHERE telegram_id=$1
+        RETURNING *
+        """,
+        telegram_id,
+        nickname,
+        age,
+        gender,
+        interested_in,
+        bio,
+        json.dumps(interests),
+        profile_photo_file_id,
+        latitude,
+        longitude,
+    )
+    return dict(row) if row else None
 
     async def set_hidden(self, target_user_id: int, hidden: bool) -> None:
         await self.db.execute(
