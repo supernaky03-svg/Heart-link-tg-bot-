@@ -51,7 +51,7 @@ MESSAGES = {
     "profile_confirm": "Confirm Profile",
     "profile_restart": "Restart",
     "ask_nickname": "Enter your nickname or display name.",
-    "ask_age": "Enter your age (18-80).",
+    "ask_age": "Enter your age (over 10).",
     "ask_gender": "Choose your gender.",
     "ask_interested_in": "Who are you interested in?",
     "ask_region": "Enter your region or country.",
