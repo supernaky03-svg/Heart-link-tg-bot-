@@ -1,4 +1,4 @@
-from __future_ _ import annotations
+from __future__ import annotations
 
 import re
 
