@@ -23,14 +23,20 @@ class LikeRepository:
 
     async def create_skip(self, user_id: int, skipped_user_id: int) -> None:
         await self.db.execute(
-            "INSERT INTO skips (user_id, skipped_user_id) VALUES ($1, $2)",
+            """
+            INSERT INTO skips (user_id, skipped_user_id)
+            VALUES ($1, $2)
+            """,
             user_id,
             skipped_user_id,
         )
 
     async def log_action(self, user_id: int, action_type: str) -> None:
         await self.db.execute(
-            "INSERT INTO user_action_logs (user_id, action_type) VALUES ($1, $2)",
+            """
+            INSERT INTO user_action_logs (user_id, action_type)
+            VALUES ($1, $2)
+            """,
             user_id,
             action_type,
         )
@@ -40,8 +46,8 @@ class LikeRepository:
             """
             SELECT COUNT(*)
             FROM user_action_logs
-            WHERE user_id=$1
-              AND action_type=$2
+            WHERE user_id = $1
+              AND action_type = $2
               AND created_at >= NOW() - ($3 || ' seconds')::interval
             """,
             user_id,
@@ -72,7 +78,7 @@ class LikeRepository:
                     """
                     SELECT *
                     FROM likes
-                    WHERE from_user_id=$1 AND to_user_id=$2
+                    WHERE from_user_id = $1 AND to_user_id = $2
                     FOR UPDATE
                     """,
                     from_user_id,
@@ -83,7 +89,7 @@ class LikeRepository:
                     """
                     SELECT *
                     FROM likes
-                    WHERE from_user_id=$1 AND to_user_id=$2
+                    WHERE from_user_id = $1 AND to_user_id = $2
                     FOR UPDATE
                     """,
                     to_user_id,
@@ -96,7 +102,7 @@ class LikeRepository:
                     """
                     SELECT *
                     FROM matches
-                    WHERE user1_id=$1 AND user2_id=$2
+                    WHERE user1_id = $1 AND user2_id = $2
                     FOR UPDATE
                     """,
                     user1_id,
@@ -107,9 +113,9 @@ class LikeRepository:
                     await conn.execute(
                         """
                         UPDATE likes
-                        SET status='matched', updated_at=NOW()
-                        WHERE (from_user_id=$1 AND to_user_id=$2)
-                           OR (from_user_id=$2 AND to_user_id=$1)
+                        SET status = 'matched', updated_at = NOW()
+                        WHERE (from_user_id = $1 AND to_user_id = $2)
+                           OR (from_user_id = $2 AND to_user_id = $1)
                         """,
                         from_user_id,
                         to_user_id,
@@ -136,7 +142,7 @@ class LikeRepository:
                         INSERT INTO matches (user1_id, user2_id, status)
                         VALUES ($1, $2, 'active')
                         ON CONFLICT (user1_id, user2_id)
-                        DO UPDATE SET status='active'
+                        DO UPDATE SET status = 'active'
                         RETURNING *
                         """,
                         user1_id,
@@ -146,9 +152,9 @@ class LikeRepository:
                     await conn.execute(
                         """
                         UPDATE likes
-                        SET status='matched', updated_at=NOW()
-                        WHERE (from_user_id=$1 AND to_user_id=$2)
-                           OR (from_user_id=$2 AND to_user_id=$1)
+                        SET status = 'matched', updated_at = NOW()
+                        WHERE (from_user_id = $1 AND to_user_id = $2)
+                           OR (from_user_id = $2 AND to_user_id = $1)
                         """,
                         from_user_id,
                         to_user_id,
@@ -179,11 +185,11 @@ class LikeRepository:
             FROM matches m
             JOIN users other
                 ON other.id = CASE
-                    WHEN m.user1_id=$1 THEN m.user2_id
+                    WHEN m.user1_id = $1 THEN m.user2_id
                     ELSE m.user1_id
                 END
-            WHERE (m.user1_id=$1 OR m.user2_id=$1)
-              AND m.status='active'
+            WHERE (m.user1_id = $1 OR m.user2_id = $1)
+              AND m.status = 'active'
             ORDER BY m.created_at DESC
             """,
             user_id,
@@ -196,7 +202,7 @@ class LikeRepository:
             WITH me AS (
                 SELECT *
                 FROM users
-                WHERE id=$1
+                WHERE id = $1
             )
             SELECT
                 u.*,
