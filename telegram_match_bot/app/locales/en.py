@@ -1,4 +1,4 @@
-MESSAGES.update({
+MESSAGES={
     "welcome": "💘 Welcome to HeartLink.",
     "profile_saved": "✅ Profile saved.",
     "main_menu_hint": "👇 Use the menu below.",
@@ -25,4 +25,4 @@ MESSAGES.update({
     "gender_female": "Female",
     "confirm_profile_text": "✅ Check your profile before saving.",
     "profile_edit_cancelled": "🛑 Profile editing cancelled.",
-})
+}
