@@ -5,8 +5,8 @@ from typing import Any
 from app.locales.en import MESSAGES as EN_MESSAGES
 from app.locales.my import MESSAGES as MY_MESSAGES
 
-
 SUPPORTED_LANGUAGES = {"en", "my"}
+
 TRANSLATIONS = {
     "en": EN_MESSAGES,
     "my": MY_MESSAGES,
@@ -30,7 +30,7 @@ class I18n:
     def localized_menu_labels(self) -> dict[str, set[str]]:
         keys = ["browse_profiles", "my_profile", "my_matches", "settings", "help"]
         result: dict[str, set[str]] = {key: set() for key in keys}
-        for lang_code, messages in TRANSLATIONS.items():
+        for _, messages in TRANSLATIONS.items():
             for key in keys:
                 result[key].add(messages[key])
         return result
