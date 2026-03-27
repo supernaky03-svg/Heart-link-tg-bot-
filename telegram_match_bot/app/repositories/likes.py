@@ -159,63 +159,93 @@ class LikeRepository:
         )
         return [dict(row) for row in rows]
 
-    async def discovery_candidate(self, user_id: int) -> dict[str, Any] | None:
-        row = await self.db.fetchrow(
-            """
-            WITH me AS (
-                SELECT * FROM users WHERE id=$1
-            )
-            SELECT
-                u.*,
-                (
-                    CASE
-                        WHEN (SELECT interested_in FROM me) = 'any' THEN 1
-                        WHEN u.gender = (SELECT interested_in FROM me) THEN 1
-                        ELSE 0
-                    END +
-                    CASE
-                        WHEN u.interested_in = 'any' THEN 1
-                        WHEN (SELECT gender FROM me) = u.interested_in THEN 1
-                        ELSE 0
-                    END +
-                    CASE
-                        WHEN COALESCE(u.region, '') <> '' AND u.region = (SELECT region FROM me) THEN 1
-                        ELSE 0
-                    END
-                ) AS compatibility_score,
-                CASE WHEN s.id IS NULL THEN 0 ELSE 1 END AS skipped_before,
-                s.created_at AS last_skipped_at
-            FROM users u
-            CROSS JOIN me
-            LEFT JOIN likes sent_like
-                   ON sent_like.from_user_id = (SELECT id FROM me)
-                  AND sent_like.to_user_id = u.id
-            LEFT JOIN matches m
-                   ON (m.user1_id = LEAST((SELECT id FROM me), u.id)
-                   AND m.user2_id = GREATEST((SELECT id FROM me), u.id))
-            LEFT JOIN LATERAL (
-                SELECT id, created_at
-                FROM skips
-                WHERE user_id=(SELECT id FROM me)
-                  AND skipped_user_id=u.id
-                ORDER BY created_at DESC
-                LIMIT 1
-            ) s ON TRUE
-            WHERE u.id <> (SELECT id FROM me)
-              AND u.is_profile_complete = TRUE
-              AND u.is_banned = FALSE
-              AND u.is_suspended = FALSE
-              AND u.is_hidden = FALSE
-              AND sent_like.id IS NULL
-              AND m.id IS NULL
-            ORDER BY
-                compatibility_score DESC,
-                skipped_before ASC,
-                last_skipped_at ASC NULLS FIRST,
-                u.last_seen_at DESC NULLS LAST,
-                random()
-            LIMIT 1
-            """,
-            user_id,
+   async def discovery_candidate(self, user_id: int) -> dict[str, Any] | None:
+    row = await self.db.fetchrow(
+        """
+        WITH me AS (
+            SELECT * FROM users WHERE id=$1
         )
-        return dict(row) if row else None
+        SELECT
+            u.*,
+            (
+                CASE
+                    WHEN u.gender = (SELECT interested_in FROM me) THEN 1
+                    ELSE 0
+                END
+                +
+                CASE
+                    WHEN (SELECT gender FROM me) = u.interested_in THEN 1
+                    ELSE 0
+                END
+            ) AS compatibility_score,
+            CASE
+                WHEN s.id IS NULL THEN 0 ELSE 1
+            END AS skipped_before,
+            s.created_at AS last_skipped_at,
+            CASE
+                WHEN u.latitude IS NOT NULL
+                     AND u.longitude IS NOT NULL
+                     AND (SELECT latitude FROM me) IS NOT NULL
+                     AND (SELECT longitude FROM me) IS NOT NULL
+                THEN (
+                    6371 * ACOS(
+                        LEAST(
+                            1.0,
+                            GREATEST(
+                                -1.0,
+                                COS(RADIANS((SELECT latitude FROM me)))
+                                * COS(RADIANS(u.latitude))
+                                * COS(RADIANS(u.longitude) - RADIANS((SELECT longitude FROM me)))
+                                +
+                                SIN(RADIANS((SELECT latitude FROM me)))
+                                * SIN(RADIANS(u.latitude))
+                            )
+                        )
+                    )
+                )
+                ELSE NULL
+            END AS distance_km
+        FROM users u
+        CROSS JOIN me
+        LEFT JOIN likes sent_like
+            ON sent_like.from_user_id = (SELECT id FROM me)
+           AND sent_like.to_user_id = u.id
+        LEFT JOIN matches m
+            ON (
+                m.user1_id = LEAST((SELECT id FROM me), u.id)
+                AND m.user2_id = GREATEST((SELECT id FROM me), u.id)
+            )
+        LEFT JOIN LATERAL (
+            SELECT id, created_at
+            FROM skips
+            WHERE user_id=(SELECT id FROM me)
+              AND skipped_user_id=u.id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) s ON TRUE
+        WHERE u.id <> (SELECT id FROM me)
+          AND u.is_profile_complete = TRUE
+          AND u.is_banned = FALSE
+          AND u.is_suspended = FALSE
+          AND u.is_hidden = FALSE
+          AND sent_like.id IS NULL
+          AND m.id IS NULL
+        ORDER BY
+            compatibility_score DESC,
+            CASE
+                WHEN distance_km IS NULL THEN 0
+                WHEN distance_km <= 10 THEN 3
+                WHEN distance_km <= 50 THEN 2
+                WHEN distance_km <= 150 THEN 1
+                ELSE 0
+            END DESC,
+            skipped_before ASC,
+            last_skipped_at ASC NULLS FIRST,
+            COALESCE(distance_km, 999999) ASC,
+            u.last_seen_at DESC NULLS LAST,
+            random()
+        LIMIT 1
+        """,
+        user_id,
+    )
+    return dict(row) if row else None
