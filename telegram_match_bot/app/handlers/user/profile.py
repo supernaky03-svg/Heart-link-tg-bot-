@@ -317,7 +317,7 @@ async def show_profile_confirmation(
     state: FSMContext,
 ) -> None:
     data = await state.get_data()
-    preview = {db_user, data}
+    preview = {**db_user, **data}
 
     await state.set_state(ProfileSetup.confirm)
     await _delete_prompt_if_exists(message, state)
