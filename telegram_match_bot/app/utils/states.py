@@ -6,10 +6,10 @@ class ProfileSetup(StatesGroup):
     age = State()
     gender = State()
     interested_in = State()
-    region = State()
     bio = State()
     interests = State()
     photo = State()
+    location = State()
     confirm = State()
 
 
