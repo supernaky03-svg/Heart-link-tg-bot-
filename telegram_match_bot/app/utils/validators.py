@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future_ _ import annotations
 
 import re
 
@@ -12,15 +12,11 @@ def validate_age(value: str) -> int | None:
     value = value.strip()
     if not value.isdigit():
         return None
+
     age = int(value)
-    if 18 <= age <= 80:
+    if 10 <= age <= 100:
         return age
     return None
-
-
-def validate_region(value: str) -> bool:
-    value = value.strip()
-    return 2 <= len(value) <= 40
 
 
 def validate_bio(value: str, min_len: int = 10, max_len: int = 280) -> bool:
@@ -30,8 +26,10 @@ def validate_bio(value: str, min_len: int = 10, max_len: int = 280) -> bool:
 
 def parse_interests(value: str) -> list[str]:
     parts = [part.strip() for part in re.split(r"[,\n]", value) if part.strip()]
+
     normalized: list[str] = []
     seen: set[str] = set()
+
     for part in parts:
         clean = re.sub(r"\s+", " ", part)
         lower = clean.casefold()
@@ -39,6 +37,7 @@ def parse_interests(value: str) -> list[str]:
             continue
         seen.add(lower)
         normalized.append(clean[:24])
+
     if 1 <= len(normalized) <= 8:
         return normalized
     return []
