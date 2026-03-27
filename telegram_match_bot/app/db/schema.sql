@@ -114,6 +114,31 @@ CREATE INDEX IF NOT EXISTS idx_matches_pair ON matches (user1_id, user2_id);
 CREATE INDEX IF NOT EXISTS idx_reports_status_created ON reports (status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_action_logs_user_type_created ON user_action_logs (user_id, action_type, created_at DESC);
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
+
+ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_gender;
+ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_interested_in;
+
+ALTER TABLE users
+    ADD CONSTRAINT chk_users_gender
+    CHECK (gender IS NULL OR gender IN ('male', 'female'));
+
+ALTER TABLE users
+    ADD CONSTRAINT chk_users_interested_in
+    CHECK (interested_in IS NULL OR interested_in IN ('male', 'female'));
+
+CREATE INDEX IF NOT EXISTS idx_users_lat_lng ON users (latitude, longitude);
+
+UPDATE users
+SET is_profile_complete = FALSE,
+    updated_at = NOW()
+WHERE profile_photo_file_id IS NULL
+   OR latitude IS NULL
+   OR longitude IS NULL
+   OR gender NOT IN ('male', 'female')
+   OR interested_in NOT IN ('male', 'female');
+
 INSERT INTO app_settings(key, value)
 VALUES ('maintenance_mode', 'false'::jsonb)
 ON CONFLICT (key) DO NOTHING;
