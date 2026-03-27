@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: telegram-match-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
+      - key: BOT_USERNAME
+        sync: false
+      - key: PORT
+        value: "10000"
+      - key: HOST
+        value: 0.0.0.0
+      - key: USE_WEBHOOK
+        value: "false"
+      - key: WEBHOOK_BASE_URL
+        sync: false
+      - key: WEBHOOK_PATH
+        value: /webhook
+      - key: DEFAULT_LANGUAGE
+        value: en
+      - key: LOG_LEVEL
+        value: INFO
