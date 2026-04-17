@@ -1,8 +1,0 @@
-services:
-  - type: web
-    name: heart-link-bot
-    env: python
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m app.main
-    autoDeploy: true
