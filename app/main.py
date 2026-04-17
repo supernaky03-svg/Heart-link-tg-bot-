@@ -19,16 +19,17 @@ from app.services.payments import PaymentService
 from app.services.storage import TelegramChannelStorage
 
 
-async def set_bot_commands(bot: Bot) -> None:
-    await bot.set_my_commands(
-        [
-            BotCommand(command="start", description="Start / create profile"),
-            BotCommand(command="menu", description="Open main menu"),
-            BotCommand(command="help", description="Help"),
-            BotCommand(command="admin", description="Admin panel"),
-            BotCommand(command="stats", description="Admin stats"),
-        ]
-    )
+await set_bot_commands(bot)
+    await bot.delete_webhook(drop_pending_updates=False)
+    http_runner = await start_http_server()
+
+    logger.info("Bot started with %s cached profiles", len(storage.profiles))
+    try:
+        await dp.start_polling(bot, app=app)
+    finally:
+        await http_runner.cleanup()
+        await storage.close()
+        await bot.session.close()
 
 
 async def index(_: web.Request) -> web.Response:
