@@ -334,9 +334,37 @@ async def onboarding_media_text(message: Message, state: FSMContext, app: AppCon
 @router.message(OnboardingStates.confirm)
 async def onboarding_confirm(message: Message, state: FSMContext, app: AppContext) -> None:
     data = await state.get_data()
-    lang = (data.get("language").value if data.get("language") else get_user_language(app.storage, message.from_user.id))
-    text = message.text or ""
-    if text == t(lang, "btn_yes"):
+    lang = (
+        data.get("language").value
+        if data.get("language")
+        else get_user_language(app.storage, message.from_user.id)
+    )
+
+    text = (message.text or "").strip()
+
+    yes_values = {
+        t(lang, "btn_yes").strip(),
+        "ဟုတ်ကဲ့",
+        "Yes",
+        "yes",
+        "Да",
+    }
+    edit_values = {
+        t(lang, "btn_edit").strip(),
+        "ပြင်မယ်",
+        "Edit",
+        "edit",
+        "Редактировать",
+    }
+    cancel_values = {
+        t(lang, "btn_cancel").strip(),
+        "မလုပ်တော့ဘူး",
+        "Cancel",
+        "cancel",
+        "Отмена",
+    }
+
+    if text in yes_values:
         profile = UserProfileRecord(
             record_id=str(message.from_user.id),
             user_id=message.from_user.id,
@@ -355,6 +383,7 @@ async def onboarding_confirm(message: Message, state: FSMContext, app: AppContex
             is_active=True,
         )
         await app.storage.save_user_profile(profile)
+
         settings = app.storage.get_user_settings(message.from_user.id)
         await app.storage.save_user_settings(
             user_id=message.from_user.id,
@@ -363,17 +392,33 @@ async def onboarding_confirm(message: Message, state: FSMContext, app: AppContex
             deleted=False,
             last_candidate_id=settings.last_candidate_id if settings else None,
         )
+
         await state.clear()
-        await message.answer(t(lang, "profile_saved"), reply_markup=main_menu_keyboard(lang))
+        await message.answer(
+            t(lang, "profile_saved"),
+            reply_markup=main_menu_keyboard(lang),
+        )
         return
-    if text == t(lang, "btn_edit"):
-        await message.answer(t(lang, "edit_prompt"), reply_markup=profile_draft_edit_keyboard(lang))
+
+    if text in edit_values:
+        await message.answer(
+            t(lang, "edit_prompt"),
+            reply_markup=profile_draft_edit_keyboard(lang),
+        )
         return
-    if text == t(lang, "btn_cancel"):
+
+    if text in cancel_values:
         await state.clear()
-        await message.answer(t(lang, "profile_cancelled"), reply_markup=main_menu_keyboard(lang))
+        await message.answer(
+            t(lang, "profile_cancelled"),
+            reply_markup=main_menu_keyboard(lang),
+        )
         return
-    await message.answer(t(lang, "is_correct"), reply_markup=yes_edit_cancel_keyboard(lang))
+
+    await message.answer(
+        t(lang, "is_correct"),
+        reply_markup=yes_edit_cancel_keyboard(lang),
+    )
 
 
 @router.callback_query(F.data.startswith("draft_edit:"))
