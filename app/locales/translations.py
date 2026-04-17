@@ -16,7 +16,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ask_gender": "Specify your gender",
         "ask_looking_for": "Who are you looking for?",
         "ask_city": "What city are you from?",
-        "ask_location": "Share your current location so I can show nearby matches.",
+        "ask_location": (
+        "Please turn on GPS / Location Services on your phone first, then tap the button below to share your current location.\n\n"
+        "If GPS is off, Telegram may ask you to choose a location manually."),
         "ask_name": "What’s your name?",
         "ask_bio": "Tell more about yourself. Who are you looking for? What do you want to do? I’ll find the best matches.",
         "ask_media": "Send up to 3 photos or 1 short video (max 15 sec).",
@@ -149,7 +151,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ask_gender": "သင့် gender ကို ရွေးပါ",
         "ask_looking_for": "ဘယ်သူမျိုးကို ရှာနေပါသလဲ?",
         "ask_city": "သင် ဘယ်မြို့ကလဲ?",
-        "ask_location": "အနီးအနားက match တွေပြနိုင်ဖို့ လက်ရှိနေရာကို share လုပ်ပါ။",
+        "ask_location": (
+        "အရင်ဆုံး ဖုန်းရဲ့ GPS / Location Services ကို ဖွင့်ပြီးမှ အောက်က button ကိုနှိပ်ကာ လက်ရှိတည်နေရာကို ပို့ပါ။\n\n"
+        "GPS မဖွင့်ထားရင် Telegram က location ကို လက်နဲ့ရွေးခိုင်းနိုင်ပါတယ်။"),
         "ask_name": "နာမည်ဘယ်လိုခေါ်လဲ?",
         "ask_bio": "ကိုယ့်အကြောင်း နည်းနည်းပြောပြပါ။ ဘယ်သူမျိုးကို ရှာနေသလဲ? ဘာလုပ်ချင်သလဲ? အကောင်းဆုံး match တွေရှာပေးမယ်။",
         "ask_media": "ဓာတ်ပုံ ၃ ပုံအထိ သို့မဟုတ် ၁၅ စက္ကန့်အောက် video ၁ ခု ပို့ပါ။",
@@ -282,7 +286,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "ask_gender": "Укажите ваш пол",
         "ask_looking_for": "Кого вы ищете?",
         "ask_city": "Из какого вы города?",
-        "ask_location": "Отправьте текущую геолокацию, чтобы я показал людей рядом.",
+        "ask_location": (
+        "Сначала включите GPS / службы геолокации на телефоне, затем нажмите кнопку ниже, чтобы отправить текущее местоположение.\n\n"
+        "Если GPS выключен, Telegram может предложить выбрать местоположение вручную."),
         "ask_name": "Как вас зовут?",
         "ask_bio": "Расскажите немного о себе. Кого вы ищете? Что хотите делать? Я найду лучшие совпадения.",
         "ask_media": "Отправьте до 3 фото или 1 короткое видео (до 15 сек).",
