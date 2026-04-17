@@ -19,33 +19,33 @@ from app.services.payments import PaymentService
 from app.services.storage import TelegramChannelStorage
 
 
-await set_bot_commands(bot)
-await bot.delete_webhook(drop_pending_updates=False)
-    http_runner = await start_http_server()
+async def set_bot_commands(bot: Bot) -> None:
+    await bot.set_my_commands(
+        [
+            BotCommand(command="start", description="Start / create profile"),
+            BotCommand(command="menu", description="Open main menu"),
+            BotCommand(command="profile", description="Open my profile"),
+            BotCommand(command="help", description="Help"),
+            BotCommand(command="admin", description="Admin panel"),
+            BotCommand(command="stats", description="Admin stats"),
+        ]
+    )
 
-    logger.info("Bot started with %s cached profiles", len(storage.profiles))
-    try:
-        await dp.start_polling(bot, app=app)
-    finally:
-        await http_runner.cleanup()
-        await storage.close()
-        await bot.session.close()
 
-
-async def index(_: web.Request) -> web.Response:
+async def index(request: web.Request) -> web.Response:
     return web.Response(text="Heart Link Bot is alive")
 
 
-async def health(_: web.Request) -> web.Response:
+async def health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "service": "heart-link-bot"})
 
 
 async def start_http_server() -> web.AppRunner:
-    http_app = web.Application()
-    http_app.router.add_get("/", index)
-    http_app.router.add_get("/health", health)
+    app = web.Application()
+    app.router.add_get("/", index)
+    app.router.add_get("/health", health)
 
-    runner = web.AppRunner(http_app)
+    runner = web.AppRunner(app)
     await runner.setup()
 
     host = "0.0.0.0"
@@ -66,12 +66,19 @@ async def main() -> None:
     )
     logger = logging.getLogger("heart_link")
 
-    http_runner = await start_http_server()
-    bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = Bot(
+        token=settings.bot_token,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
+
     storage = TelegramChannelStorage(settings)
     await storage.rebuild_cache()
 
-    app = AppContext(settings=settings, storage=storage, payments=PaymentService())
+    app = AppContext(
+        settings=settings,
+        storage=storage,
+        payments=PaymentService(),
+    )
 
     dp = Dispatcher()
     dp.message.middleware(ThrottleMiddleware())
@@ -79,6 +86,9 @@ async def main() -> None:
     dp.include_router(setup_routers())
 
     await set_bot_commands(bot)
+    await bot.delete_webhook(drop_pending_updates=False)
+    http_runner = await start_http_server()
+
     logger.info("Bot started with %s cached profiles", len(storage.profiles))
     try:
         await dp.start_polling(bot, app=app)
