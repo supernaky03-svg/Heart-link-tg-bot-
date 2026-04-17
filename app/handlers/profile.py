@@ -22,9 +22,15 @@ async def show_profile(message: Message, app: AppContext) -> None:
     lang = get_user_language(app.storage, message.from_user.id)
     profile = app.storage.get_user_profile(message.from_user.id)
     settings = app.storage.get_user_settings(message.from_user.id)
-    if not profile:
+
+    if (
+        not profile
+        or not profile.is_active
+        or (settings and settings.deleted)
+    ):
         await message.answer(t(lang, "not_enough_profile"))
         return
+
     paused = settings.paused if settings else False
     await send_profile_media(
         message.bot,
