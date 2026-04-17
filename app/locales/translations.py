@@ -136,6 +136,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "like_notification_title": "Someone liked you ❤️",
+        "like_notification_intro": "They also sent an intro:\n\n{intro}",
     },
     "my": {
         "choose_language": "သင့်ဘာသာစကားကိုရွေးပါ",
@@ -267,6 +269,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "like_notification_title": "တစ်ယောက်ယောက်က သင့်ကို ကြိုက်နှစ်သက်ထားပါတယ် ❤️",
+        "like_notification_intro": "သူ/သူမ ပို့ထားတဲ့ မိတ်ဆက်စာ:\n\n{intro}",
     },
     "ru": {
         "choose_language": "Выберите язык",
@@ -398,6 +402,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "like_notification_title": "Кто-то поставил вам лайк ❤️",
+        "like_notification_intro": "Он(а) также отправил(а) сообщение:\n\n{intro}",
     },
 }
 
