@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 
+from aiohttp import web
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -29,6 +31,31 @@ async def set_bot_commands(bot: Bot) -> None:
     )
 
 
+async def index(request: web.Request) -> web.Response:
+    return web.Response(text="Heart Link Bot is alive")
+
+
+async def health(request: web.Request) -> web.Response:
+    return web.json_response({"ok": True, "service": "heart-link-bot"})
+
+
+async def start_http_server() -> web.AppRunner:
+    app = web.Application()
+    app.router.add_get("/", index)
+    app.router.add_get("/health", health)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+
+    host = "0.0.0.0"
+    port = int(os.getenv("PORT", "10000"))
+    site = web.TCPSite(runner, host=host, port=port)
+    await site.start()
+
+    logging.getLogger("heart_link").info("HTTP health server started on %s:%s", host, port)
+    return runner
+
+
 async def main() -> None:
     settings = get_settings()
     logging.basicConfig(
@@ -50,10 +77,13 @@ async def main() -> None:
     dp.include_router(setup_routers())
 
     await set_bot_commands(bot)
+    http_runner = await start_http_server()
+
     logger.info("Bot started with %s cached profiles", len(storage.profiles))
     try:
         await dp.start_polling(bot, app=app)
     finally:
+        await http_runner.cleanup()
         await storage.close()
         await bot.session.close()
 
