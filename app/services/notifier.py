@@ -8,7 +8,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.locales.translations import t
 from app.models.records import LikeRecord, UserProfileRecord
-from app.utils.formatters import profile_preview_text
+from app.utils.formatters import discover_card_text
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,30 @@ async def send_profile_media(bot: Bot, chat_id: int, profile: UserProfileRecord,
     else:
         await bot.send_photo(chat_id, profile.media_file_ids[0], caption=caption, reply_markup=reply_markup)
 
+
+async def notify_like(
+    bot: Bot,
+    liker: UserProfileRecord,
+    target: UserProfileRecord,
+    like: LikeRecord,
+) -> None:
+    lines = [t(target.language.value, "like_notification_title")]
+
+    if like.intro_message:
+        lines.extend(
+            [
+                "",
+                t(target.language.value, "like_notification_intro", intro=like.intro_message),
+            ]
+        )
+
+    lines.extend(["", discover_card_text(target, liker)])
+
+    try:
+        await send_profile_media(bot, target.user_id, liker, "\n".join(lines))
+    except (TelegramForbiddenError, TelegramBadRequest):
+        logger.warning("Could not notify liked user_id=%s", target.user_id)
+        
 
 async def notify_match(
     bot: Bot,
