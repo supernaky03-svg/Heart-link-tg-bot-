@@ -20,7 +20,7 @@ from app.services.storage import TelegramChannelStorage
 
 
 await set_bot_commands(bot)
-    await bot.delete_webhook(drop_pending_updates=False)
+await bot.delete_webhook(drop_pending_updates=False)
     http_runner = await start_http_server()
 
     logger.info("Bot started with %s cached profiles", len(storage.profiles))
