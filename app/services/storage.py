@@ -262,6 +262,17 @@ class TelegramChannelStorage:
             return expired
         return profile
 
+    
+    def get_visible_profile(self, user_id: int) -> Optional[UserProfileRecord]:
+    profile = self.get_user_profile(user_id)
+    settings = self.get_user_settings(user_id)
+    if not profile or not profile.is_active:
+        return None
+    if settings and (settings.paused or settings.deleted):
+        return None
+    return profile
+
+    
     def get_user_settings(self, user_id: int) -> Optional[UserSettingsRecord]:
         return self.settings_cache.get(user_id)
 
