@@ -137,8 +137,8 @@ async def edit_value(message: Message, state: FSMContext, app: AppContext) -> No
         except Exception:
             await message.answer(t(lang, "age_invalid"))
             return
-        if age < 18:
-            await message.answer(t(lang, "age_underage"))
+        if age < app.settings.min_age:
+            await message.answer(t(lang, "age_underage", min_age=app.settings.min_age))
             return
         update_data["age"] = age
     elif field == "gender":
