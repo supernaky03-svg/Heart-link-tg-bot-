@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     broadcast_delay_ms: int = Field(default=50, alias="BROADCAST_DELAY_MS")
     max_bio_length: int = Field(default=400, alias="MAX_BIO_LENGTH")
     max_name_length: int = Field(default=40, alias="MAX_NAME_LENGTH")
+    min_age: int = Field(default=13, alias="MIN_AGE")
 
     model_config = SettingsConfigDict(
         env_file=".env",
