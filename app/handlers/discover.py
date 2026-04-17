@@ -13,6 +13,8 @@ from app.services.notifier import notify_match, send_profile_media
 from app.states import DiscoverStates
 from app.utils.formatters import discover_card_text
 from app.utils.text import sanitize_text
+from app.services.notifier import notify_like, notify_match, send_profile_media
+
 
 router = Router(name="discover")
 
@@ -43,15 +45,19 @@ async def _process_like(message: Message, app: AppContext, source_user_id: int, 
     lang = get_user_language(app.storage, source_user_id)
     viewer = app.storage.get_user_profile(source_user_id)
     target = app.storage.get_user_profile(target_user_id)
+
     if not viewer or not target or source_user_id == target_user_id:
         await message.answer(t(lang, "cannot_match_self"))
         return
+
     like = await app.storage.save_like(source_user_id, target_user_id, intro_message=intro)
     reverse_like = app.storage.get_like(target_user_id, source_user_id)
+
     if reverse_like:
         await app.storage.create_match(source_user_id, target_user_id)
         await notify_match(message.bot, viewer, target, like, reverse_like)
     else:
+        await notify_like(message.bot, viewer, target, like)
         await message.answer(t(lang, "liked" if not intro else "intro_saved"))
 
 
