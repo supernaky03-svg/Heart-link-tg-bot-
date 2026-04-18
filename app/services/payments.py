@@ -1,34 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from app.models.records import PremiumPlan
 
 
-@dataclass
-class PaymentQuote:
-    title: str
-    description: str
-    amount_stars: int
-    payload: str
-
-
 class PaymentService:
-    def build_premium_quote(self, user_id: int, plan: PremiumPlan) -> PaymentQuote:
-        return PaymentQuote(
-            title=f"Heart Link Premium • {plan.days} days",
-            description=(
-                "Activate Premium and be at the top ✨\n\n"
-                "Stand out from others:\n"
-                "📈 More profile views\n"
-                "🚀 More likes\n"
-                "👀 Your likes are seen first\n"
-                "⭐️ Your profile ranks higher\n\n"
-                "More attention. More matches. More connections 💫"
-            ),
-            amount_stars=plan.stars,
-            payload=f"premium:{user_id}:{plan.plan_id}:{plan.days}:{plan.stars}",
-        )
+    def build_premium_payload(self, user_id: int, plan: PremiumPlan) -> str:
+        return f"premium:{user_id}:{int(plan.plan_id)}:{int(plan.days)}:{int(plan.stars)}"
 
     def parse_premium_payload(self, payload: str) -> tuple[int, int, int, int] | None:
         try:
@@ -38,3 +15,25 @@ class PaymentService:
             return int(user_id), int(plan_id), int(days), int(stars)
         except Exception:
             return None
+
+    async def apply_successful_premium_payment(self, storage, payment) -> bool:
+        parsed = self.parse_premium_payload(payment.invoice_payload)
+        if not parsed:
+            return False
+
+        user_id, _plan_id, days, _stars = parsed
+        profile = storage.get_user_profile(user_id)
+        if not profile:
+            return False
+
+        await storage.grant_premium(user_id, days, granted_by=user_id)
+        await storage.log_admin_action(
+            user_id,
+            "premium_payment",
+            user_id=user_id,
+            days=days,
+            stars=payment.total_amount,
+            currency=payment.currency,
+            charge_id=payment.telegram_payment_charge_id,
+        )
+        return True
