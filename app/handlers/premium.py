@@ -52,12 +52,18 @@ async def premium_screen(message: Message, app: AppContext) -> None:
 @router.callback_query(F.data.startswith("premium_buy:"))
 async def premium_buy(callback: CallbackQuery, app: AppContext) -> None:
     lang = get_user_language(app.storage, callback.from_user.id)
-    plan_id = callback.data.split(":", 1)[1]
+
+    try:
+        plan_id = int(callback.data.split(":", 1)[1])
+    except (ValueError, IndexError):
+        await callback.answer(t(lang, "generic_error"), show_alert=True)
+        return
+
     config = app.storage.get_config()
-    plan = next((p for p in config.premium_plans if p.plan_id == plan_id), None)
+    plan = next((p for p in config.premium_plans if int(p.plan_id) == plan_id), None)
 
     if not plan:
-        await callback.answer(t(lang, "generic_error"), show_alert=True)
+        await callback.answer(t(lang, "premium_plan_not_found"), show_alert=True)
         return
 
     payload = app.payments.build_premium_payload(callback.from_user.id, plan)
