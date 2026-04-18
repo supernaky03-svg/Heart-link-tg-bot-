@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import logging
+
 from aiogram import F, Router
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 
 from app.context import AppContext
@@ -10,79 +13,81 @@ from app.services.localization import get_user_language
 from app.utils.formatters import premium_text
 
 router = Router(name="premium")
+logger = logging.getLogger("heart_link")
 
 
 def _premium_variants() -> set[str]:
-    return {t("en", "menu_premium"), t("my", "menu_premium"), t("ru", "menu_premium")}
+    return {
+        t("en", "menu_premium").strip(),
+        t("my", "menu_premium").strip(),
+        t("ru", "menu_premium").strip(),
+        "⭐ Premium",
+    }
 
 
-@router.message(lambda m: (m.text or "").strip() in _premium_variants())
-async def premium_screen(message: Message, app: AppContext) -> None:
+async def _show_premium_screen(message: Message, app: AppContext) -> None:
+    logger.info("PREMIUM menu hit text=%r user_id=%s", message.text, message.from_user.id)
+
     lang = get_user_language(app.storage, message.from_user.id)
     profile = app.storage.get_user_profile(message.from_user.id)
     config = app.storage.get_config()
     premium_until = profile.premium_until if profile else None
+
     await message.answer(
         premium_text(lang, config.premium_plans, premium_until),
         reply_markup=premium_buy_keyboard(lang, config.premium_plans),
     )
 
 
+@router.message(Command("premium"))
+async def premium_command(message: Message, app: AppContext) -> None:
+    await _show_premium_screen(message, app)
+
+
+@router.message(lambda m: (m.text or "").strip() in _premium_variants())
+async def premium_screen(message: Message, app: AppContext) -> None:
+    await _show_premium_screen(message, app)
+
+
 @router.callback_query(F.data.startswith("premium_buy:"))
 async def premium_buy(callback: CallbackQuery, app: AppContext) -> None:
     lang = get_user_language(app.storage, callback.from_user.id)
-    await callback.answer()
-    plan_id = int(callback.data.split(":", 1)[1])
-    profile = app.storage.get_user_profile(callback.from_user.id)
-    if not profile or not profile.is_active:
-        await callback.message.answer(t(lang, "not_enough_profile"))
-        return
-    cfg = app.storage.get_config()
-    plan = next((p for p in cfg.premium_plans if p.plan_id == plan_id), None)
+    plan_id = callback.data.split(":", 1)[1]
+    config = app.storage.get_config()
+    plan = next((p for p in config.premium_plans if p.plan_id == plan_id), None)
+
     if not plan:
-        await callback.message.answer(t(lang, "premium_plan_not_found"))
+        await callback.answer(t(lang, "generic_error"), show_alert=True)
         return
 
-    quote = app.payments.build_premium_quote(callback.from_user.id, plan)
-    await callback.message.bot.send_invoice(
-        chat_id=callback.from_user.id,
-        title=quote.title,
-        description=quote.description,
-        payload=quote.payload,
+    payload = app.payments.build_premium_payload(callback.from_user.id, plan)
+
+    await callback.message.answer_invoice(
+        title=t(lang, "premium_title"),
+        description=t(lang, "premium_description"),
+        payload=payload,
         currency="XTR",
-        prices=[LabeledPrice(label=quote.title, amount=quote.amount_stars)],
-        provider_token="",
+        prices=[LabeledPrice(label=f"{plan.days} days", amount=plan.stars)],
     )
+    await callback.answer()
 
 
 @router.pre_checkout_query()
-async def premium_pre_checkout(query: PreCheckoutQuery) -> None:
-    await query.answer(ok=True)
+async def premium_pre_checkout(pre_checkout_query: PreCheckoutQuery) -> None:
+    await pre_checkout_query.answer(ok=True)
 
 
 @router.message(F.successful_payment)
 async def premium_success(message: Message, app: AppContext) -> None:
-    lang = get_user_language(app.storage, message.from_user.id)
     payment = message.successful_payment
     if not payment or payment.currency != "XTR":
         return
-    plan_info = app.payments.parse_premium_payload(payment.invoice_payload)
-    if not plan_info or plan_info[0] != message.from_user.id:
-        await message.answer(t(lang, "premium_payment_invalid"))
+
+    lang = get_user_language(app.storage, message.from_user.id)
+    ok = await app.payments.apply_successful_premium_payment(app.storage, payment)
+
+    if not ok:
+        await message.answer(t(lang, "generic_error"))
         return
-    _, _plan_id, days, _stars = plan_info
-    profile = app.storage.get_user_profile(message.from_user.id)
-    if not profile:
-        await message.answer(t(lang, "not_enough_profile"))
-        return
-    await app.storage.grant_premium(message.from_user.id, days, granted_by=message.from_user.id)
-    await app.storage.log_admin_action(
-        message.from_user.id,
-        "premium_payment",
-        user_id=message.from_user.id,
-        days=days,
-        stars=payment.total_amount,
-        currency=payment.currency,
-        charge_id=payment.telegram_payment_charge_id,
-    )
-    await message.answer(t(lang, "premium_payment_success"))
+
+    await message.answer(t(lang, "premium_activated"))
