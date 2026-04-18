@@ -30,7 +30,7 @@ This fixed version is ready for Render with:
 - English / Myanmar / Russian localization
 - Full onboarding flow:
   - age validation
-  - 18+ enforcement
+  - 13+ enforcement
   - gender
   - looking for
   - city
