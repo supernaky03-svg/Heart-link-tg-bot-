@@ -161,7 +161,7 @@ async def onboarding_age(message: Message, state: FSMContext, app: AppContext) -
         await message.answer(t(lang, "age_invalid"))
         return
     if age < app.settings.min_age:
-        await message.answer(t(lang, "age_restricted", min_age=app.settings.min_age))
+        await message.answer(t(lang, "age_underage", min_age=app.settings.min_age))
         return
 
     await state.update_data(age=age)
