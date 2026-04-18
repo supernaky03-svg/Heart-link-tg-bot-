@@ -111,11 +111,35 @@ def premium_edit_keyboard(plan_id: int) -> InlineKeyboardMarkup:
 
 
 
-def premium_buy_keyboard(lang: str, plans: list[tuple[int, int, int]] | list) -> InlineKeyboardMarkup:
+def premium_buy_keyboard(lang: str, plans) -> InlineKeyboardMarkup:
     rows = []
+
     for plan in plans:
-        plan_id = getattr(plan, 'plan_id', plan[0])
-        days = getattr(plan, 'days', plan[1])
-        stars = getattr(plan, 'stars', plan[2])
-        rows.append([InlineKeyboardButton(text=f"{days} days • ⭐ {stars}", callback_data=f"premium_buy:{plan_id}")])
+        if hasattr(plan, "plan_id"):
+            plan_id = plan.plan_id
+            days = plan.days
+            stars = plan.stars
+        else:
+            plan_id = plan[0]
+            days = plan[1]
+            stars = plan[2]
+
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=f"{days} days • ⭐ {stars}",
+                    callback_data=f"premium_buy:{plan_id}",
+                )
+            ]
+        )
+
+    rows.append(
+        [
+            InlineKeyboardButton(
+                text="✖ Close",
+                callback_data="premium_close",
+            )
+        ]
+    )
+
     return InlineKeyboardMarkup(inline_keyboard=rows)
