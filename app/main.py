@@ -28,6 +28,7 @@ async def set_bot_commands(bot: Bot) -> None:
             BotCommand(command="help", description="Help"),
             BotCommand(command="admin", description="Admin panel"),
             BotCommand(command="stats", description="Admin stats"),
+            BotCommand(command="premium", description="Open premium"),
         ]
     )
 
