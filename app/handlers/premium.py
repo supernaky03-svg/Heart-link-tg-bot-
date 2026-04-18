@@ -76,6 +76,11 @@ async def premium_buy(callback: CallbackQuery, app: AppContext) -> None:
 async def premium_pre_checkout(pre_checkout_query: PreCheckoutQuery) -> None:
     await pre_checkout_query.answer(ok=True)
 
+@router.callback_query(F.data == "premium_close")
+async def premium_close(callback: CallbackQuery) -> None:
+    await callback.message.delete()
+    await callback.answer()
+
 
 @router.message(F.successful_payment)
 async def premium_success(message: Message, app: AppContext) -> None:
