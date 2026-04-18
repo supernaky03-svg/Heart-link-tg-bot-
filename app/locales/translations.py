@@ -143,6 +143,16 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "generic_error": "Something went wrong. Please try again.",
+        "premium_description": (
+            "Activate Premium and be at the top ✨\n\n"
+            "Stand out from others:\n"
+            "📈 More profile views\n"
+            "🚀 More likes\n"
+            "👀 Your likes are seen first\n"
+            "⭐️ Your profile ranks higher\n\n"
+            "More attention. More matches. More connections 💫"),
+        "premium_activated": "✅ Premium activated successfully.",
     },
     "my": {
         "choose_language": "သင့်ဘာသာစကားကိုရွေးပါ",
@@ -281,6 +291,16 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "generic_error": "တစ်ခုခု မှားနေပါတယ်။ ပြန်စမ်းကြည့်ပါ။",
+        "premium_description": (
+            "Premium ဖွင့်ပြီး အပေါ်ဆုံးမှာ ပေါ်အောင်လုပ်ပါ ✨\n\n"
+            "အခြားသူတွေထက် ပိုထင်ရှားစေမယ်:\n"
+            "📈 profile views ပိုများမယ်\n"
+            "🚀 likes ပိုများမယ်\n"
+            "👀 သင့် like တွေကို အရင်မြင်မယ်\n"
+            "⭐️ ranking ပိုမြင့်မယ်\n\n"
+            "ပိုအာရုံစိုက်မှု။ ပို match။ ပို connection 💫"),
+        "premium_activated": "✅ Premium အောင်မြင်စွာ ဖွင့်ပြီးပါပြီ။",
     },
     "ru": {
         "choose_language": "Выберите язык",
@@ -419,6 +439,16 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "language_name_en": "English",
         "language_name_my": "မြန်မာ",
         "language_name_ru": "Русский",
+        "generic_error": "Что-то пошло не так. Попробуйте ещё раз.",
+        "premium_description": (
+            "Активируйте Premium и поднимитесь выше ✨\n\n"
+            "Выделяйтесь среди остальных:\n"
+            "📈 Больше просмотров профиля\n"
+            "🚀 Больше лайков\n"
+            "👀 Ваши лайки видят раньше\n"
+            "⭐️ Ваш профиль выше в выдаче\n\n"
+            "Больше внимания. Больше совпадений. Больше знакомств 💫"),
+        "premium_activated": "✅ Premium успешно активирован.",
     },
 }
 
